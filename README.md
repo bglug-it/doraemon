@@ -1,2 +1,2 @@
-# mac2hostname
-Assign hostname based on MAC address
+# doraemon
+Helps client to join to domain and maintain itself.
