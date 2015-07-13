@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 """Helps a client to join domain and maintain itself."""
 __author__ = 'Enrico Bacis'
@@ -68,13 +69,17 @@ class MyApp:
   def __normalizemac(self, mac):
     return ':'.join(x.zfill(2) for x in mac.split('_')).lower()
 
-  def __gethostname(self, mac):
-    # At this point, the mac is set.
+  def __gethostname(self, mac, base = None, role = None):
+    if base == None:
+      base = self.__defaultbase
+    if role == None:
+      role = self.__defaultrole
+
     with self.__getcursor() as cursor:
       (newid,) = cursor.execute('SELECT COALESCE(MAX(id) + 1, 1) FROM client').fetchone()
       # Constucts the hostname format
       formatstring = '%s-%0' + self.__namedigits + 'd'
-      data = (newid, formatstring % (self.__defaultbase, newid), mac, self.__role)
+      data = (newid, formatstring % (base, newid), mac, role)
       # Since MAC is Unique, this fails with the same MAC address
       cursor.execute('INSERT OR IGNORE INTO client VALUES (?, ?, ?, ?)', data)
       (hostname,) = cursor.execute('SELECT hostname FROM client WHERE mac = "%s"' % mac).fetchone()
@@ -93,15 +98,16 @@ class MyApp:
       return "Usage: GET /mac2hostname?mac=XX_XX_XX_XX_XX_XX[&base=YYY][&role=ZZZ]"
     # Sets up variables for possible parameters
     mac = self.__normalizemac(request.query.mac)
-    self.__base = request.query.base or self.__defaultbase
-    self.__role = request.query.role or self.__defaultrole
-    return self.__gethostname(mac)
+    base = request.query.base or self.__defaultbase
+    role = request.query.role or self.__defaultrole
+    return self.__gethostname(mac, base, role)
 
   def whatsmyhostname(self):
     # No required parameters
     ip = request.query.ip or request['REMOTE_ADDR']
-    self.__role = request.query.role or self.__defaultrole
-    return self.__gethostname(self.__getmac(ip))
+    base = request.query.base or self.__defaultbase
+    role = request.query.role or self.__defaultrole
+    return self.__gethostname(self.__getmac(ip), base, role)
 
   def hosts(self):
     # Default where clause: no where specifications
@@ -124,21 +130,21 @@ class MyApp:
       return f.read()
 
   def vaultpass(self):
-    with open(self.__vaultpassfile) as f:
+    with open(self.__vaultpassfile, 'r') as f:
       ip = request.query.ip or request['REMOTE_ADDR']
-      hostname = self.__gethostname(self.__getmac(ip))
-      # Chiave
+      base = request.query.base or self.__defaultbase
+      role = request.query.role or self.__defaultrole
+      hostname = self.__gethostname(self.__getmac(ip), base, role)
+      # Encryption key
       key = MD5.new(hostname).digest()
-      # Segreto da crittare
+      # Secret
       secret = f.read().strip()
-      # Rendo il segreto lungo un multiplo di 16 byte
+      # Creating a secret that is multiple of 16 in length
       i = 16 - (len(secret) % 16)
-      lenghty_secret = secret + i * 'x'
+      lengthy_secret = secret + i * 'x'
       cipher = AES.new(key, AES.MODE_ECB)
-      crypted = cipher.encrypt(lenghty_secret)
-
-      # Devo ritornare un base64 perché la stringa criptata è UTF-8 e non è
-      # sempre visibile.
+      crypted = cipher.encrypt(lengthy_secret)
+      # Encode in base64 because of unicode strings
       return base64.b64encode(crypted)
 
   def start(self):
@@ -153,7 +159,7 @@ class MyApp:
 
 # Main body
 if __name__ == '__main__':
-  cfgfile = '/etc/mac2hostname.ini'
+  cfgfile = '/etc/doraemon.ini'
   if len(sys.argv) > 1:
     cfgfile = sys.argv[1]
   app = MyApp(cfgfile)
