@@ -1,7 +1,7 @@
 Summary: Helps client to join domain and maintain itself
 Name: doraemon
 Version: 1.0.0
-Release: 1.ns6
+Release: 2.ns6
 URL: https://github.com/bglug-it/doraemon/
 License: GPLv2+
 Group: System Environment/Daemons
@@ -33,6 +33,10 @@ install -d -m 755 %{buildroot}%{_bindir}
 install -m 755 doraemon.py %{buildroot}%{_bindir}/%{name}.py
 # Cartella del database
 install -d %{buildroot}%{_sharedstatedir}/%{name}
+# File per il rotate
+install -d %{buildroot}%{_sysconfdir}/logrotate.d
+install -m 644 doraemon.logrotate %{buildroot}%{_sysconfdir}/logrotate.d/%{name}
+# File di Nethserver
 install -d %{buildroot}%{_sysconfdir}/e-smith/db/configuration/defaults/%{name}
 install -m 644 type %{buildroot}%{_sysconfdir}/e-smith/db/configuration/defaults/%{name}/type
 install -m 644 status %{buildroot}%{_sysconfdir}/e-smith/db/configuration/defaults/%{name}/status
@@ -64,6 +68,7 @@ rm -rf %{buildroot}
 %attr(755,-,-) %{_bindir}/%{name}.py
 
 %dir %attr(755,-,-) %{_sharedstatedir}/%{name}
+%{_sysconfdir}/logrotate.d/%{name}
 %dir %attr(755,-,-) %{_sysconfdir}/e-smith/db/configuration/defaults/%{name}
 %{_sysconfdir}/e-smith/db/configuration/defaults/%{name}/status
 %{_sysconfdir}/e-smith/db/configuration/defaults/%{name}/type
@@ -71,5 +76,8 @@ rm -rf %{buildroot}
 %{_sysconfdir}/e-smith/db/configuration/defaults/%{name}/TCPPort
 
 %changelog
+* Wed Jul 15 2015 Emiliano Vavassori <syntaxerrormmm-AT-gmail.com> - 1.0.0-2.ns6
+- Added logrotate file.
+
 * Mon Jul 13 2015 Emiliano Vavassori <syntaxerrormmm-AT-gmail.com> - 1.0.0-1.ns6
 - Unique binary for both ansiblehelper and mac2hostname.
