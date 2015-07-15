@@ -28,21 +28,15 @@ Actually, the server responds to the following routes:
 
 * `/mac2hostname`: responds to the client stating the hostname based on MAC
   address. Actually requires following parameters:
-
     - `mac`: the MAC address for which create the hostname.
-
   Optional parameters:
-
     - `base`: basename of the client. Can be any string. Defaulting to "lab".
     - `role`: role of the client to be created. Can be any string (default:
       "client").
-
 * `/whatsmyhostname`: returns hostname for the client that requested the
   route. May accept the following optional parameters:
-    
     - `base`: basename of the client.
     - `role`: role of the client.
-
 * `/hosts`: returns a dictionary of all hosts registered, each with its role,
   hostname and MAC address. 
 * `/domain`: returns YAML-formatted output for domain information.
@@ -52,8 +46,7 @@ Actually, the server responds to the following routes:
   files within [Ansible configuration
 repository](https://github.com/bglug-it/client-pull-installation).
 
-
-### TODO List ###
+## TODO List ##
 
 * Implement methods for dynamic inventory for Ansible
 * Verify RPM packaging to automatically start daemon as soon as it is
