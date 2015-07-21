@@ -1,26 +1,25 @@
 # doraemon #
 
-`doraemon` is a helper daemon that provides information to network clients
-based on Ubuntu system, to correctly join in a SAMBA 3.0 domain served by
-NethServer with [custom configurations](https://github.com/bglug-it/ps-srvmgmt).
+## Progetto Scuola [<img src="https://avatars1.githubusercontent.com/u/12886037?v=3&s=200" width="25" height="25" /> BgLUG][bglug] - Scenery 1 ##
 
-It is a webserver (based on [Python
-Bottle](http://bottlepy.org/docs/dev/index.html)) responding on port 3000 to
-requests from client during provisioning phase with
-[Ansible](http://www.ansible.com/).
+`doraemon` is a helper daemon that provides information to [Ubuntu][] network
+clients, to correctly join in a [SAMBA][] 3.0 domain served by [NethServer][]
+with [custom configurations][server-config].
+
+It is a webserver (based on [Python Bottle][bottle]) responding on port 3000
+to requests from client during provisioning phase with [Ansible][].
 
 This repo contains the server itself (`doraemon.py`) plus all the other files
-needed to package a RPM installable on a
-[NethServer](http://www.nethserver.org) 6.0 server.
+needed to package a RPM installable on a [NethServer][] 6.0 server.
 
-It stores the configuration for the hosts inside a [SQLite](https://www.sqlite.org/) database.
+It stores the configuration for the hosts inside a [SQLite][] database, plus
+providing some other information from well-known files inside the filesystem.
 
 Please see `doraemon.ini` for configuration of the server.
 
-It is licensed under [GPLv2](https://www.gnu.org/licenses/gpl-2.0.html) license.
+It is licensed under [GPLv2][] license.
 
-Thanks to the initial developer, [Enrico
-Bacis](https://github.com/enricobacis).
+Thanks to the initial developer, [Enrico Bacis][].
 
 ## Routes served ##
 
@@ -43,8 +42,7 @@ Actually, the server responds to the following routes:
 * `/mgmtkey`: returns the SSH public key for the management user inside the
   network.
 * `/vaultpass`: provides encrypted password for the decription of vaulted
-  files within [Ansible configuration
-repository](https://github.com/bglug-it/client-pull-installation).
+  files within [Ansible configuration repository][client-pull-installation].
 
 ## TODO List ##
 
@@ -52,3 +50,15 @@ repository](https://github.com/bglug-it/client-pull-installation).
 * Verify RPM packaging to automatically start daemon as soon as it is
   installed
 * Verify NethServer script for `runlevel-adjust`
+
+[bglug]: http://bglug.it "BgLUG Homepage"
+[ubuntu]: http://www.ubuntu.com
+[samba]: http://www.samba.org
+[nethserver]: http://www.nethserver.org
+[server-config]: https://github.com/bglug-it/server-config
+[client-pull-installation]: https://github.com/bglug-it/client-pull-installation
+[bottle]: http://bottlepy.org/docs/dev/index.html
+[ansible]: http://www.ansible.com
+[sqlite]: https://www.sqlite.org/
+[gplv2]: https://www.gnu.org/licenses/gpl-2.0.html
+[enrico bacis]: https://github.com/enricobacis
