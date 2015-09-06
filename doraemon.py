@@ -46,6 +46,12 @@ class MyApp:
     # Assures table creation
     self.__init_tables()
 
+  @contextmanager
+  def __getcursor(self):
+    with connect(self.__dbfile) as connection:
+      with closing(connection.cursor()) as cursor:
+        yield cursor
+
   # Private methods
   def __route(self):
     self.__app.get('/mac2hostname', callback=self.mac2hostname)
@@ -54,6 +60,8 @@ class MyApp:
     self.__app.get('/domain', callback=self.domain)
     self.__app.get('/mgmtkey', callback=self.mgmtkey)
     self.__app.get('/vaultpass', callback=self.vaultpass)
+    self.__app.get('/ansible_list', callback=self.ansible_list)
+    self.__app.get('/ansible_host', callback=self.ansible_host)
 
   def __init_tables(self):
     with self.__getcursor() as cursor:
@@ -85,11 +93,34 @@ class MyApp:
       (hostname,) = cursor.execute('SELECT hostname FROM client WHERE mac = "%s"' % mac).fetchone()
       return hostname
 
-  @contextmanager
-  def __getcursor(self):
-    with connect(self.__dbfile) as connection:
-      with closing(connection.cursor()) as cursor:
-        yield cursor
+  # This should be used only after registration of the client
+  # (whatsmyhostname)
+  def __getrole(self):
+    macaddress = self.__normalizemac(self.__getmac(request['REMOTE_ADDR']))
+    hostname = self.__gethostname(macaddress)
+
+    with self.__getcursor() as cursor:
+      (role,) = cursor.execute("SELECT role FROM client WHERE hostname = '%s' AND mac = '%s'" % (hostname, macaddress)).fetchone()
+    return role
+
+  # Mocks up variables to be returned.
+  # When will be ready Enrico's work on the interface, this should be simpler
+  # to implement.
+  def __rolevars(self, role=None):
+    retval = {}
+    if role == 'client':
+      retval = {
+        'role': role,
+        'addpkg': [ 'gimp' ],
+        'delpkg': []
+      }
+    elif role == 'docente':
+      retval = {
+        'role': role,
+        'addpkg': [],
+        'delpkg': []
+      }
+    return retval
 
   # Instance methods AKA routes
   def mac2hostname(self):
@@ -146,6 +177,37 @@ class MyApp:
       crypted = cipher.encrypt(lengthy_secret)
       # Encode in base64 because of unicode strings
       return base64.b64encode(crypted)
+
+  def ansible_list(self):
+    # Faking calls
+    if request.query.role:
+      role = request.query.role
+    else:
+      role = self.__getrole()
+
+    result = {
+        'localhost': {
+          'hosts':  [ 'localhost' ],
+          'vars': {
+            'ansible_connection': 'local'
+          }
+        },
+        '_meta': {
+          'hostvars': {
+            'localhost': self.__rolevars(role)
+          }
+        }
+    }
+    return dumps(result)
+
+  def ansible_host(self):
+    # Ignoring 'host' parameter, since it should always be 'localhost'.
+    # Instead, for testing purposes, if asked for a role, use it
+    if request.query.role:
+      role = request.query.role
+    else:
+      role = self.__getrole()
+    return dumps(self.__rolevars(role))
 
   def start(self):
     # Opens up a PID file

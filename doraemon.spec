@@ -1,7 +1,7 @@
 Summary: Helps client to join domain and maintain itself
 Name: doraemon
-Version: 1.0.0
-Release: 2.ns6
+Version: 1.1.0
+Release: 1.ns6
 URL: https://github.com/bglug-it/doraemon/
 License: GPLv2+
 Group: System Environment/Daemons
@@ -9,7 +9,7 @@ BuildRoot: %{_tmppath}/%{name}-root
 Requires: python python-bottle python-crypto2.6 nethserver-base
 Requires(post): chkconfig nethserver-base
 Requires(preun): chkconfig initscripts nethserver-base
-Source0: doraemon-1.0.0.tar.gz
+Source0: doraemon-1.1.0.tar.gz
 BuildArch: noarch
 
 %description
@@ -76,6 +76,9 @@ rm -rf %{buildroot}
 %{_sysconfdir}/e-smith/db/configuration/defaults/%{name}/TCPPort
 
 %changelog
+* Sun Sep 06 2015 Emiliano Vavassori <syntaxerrormmm-AT-gmail.com> - 1.1.0-1.ns6
+- Packing new version with new functionalities.
+
 * Wed Jul 15 2015 Emiliano Vavassori <syntaxerrormmm-AT-gmail.com> - 1.0.0-2.ns6
 - Added logrotate file.
 
