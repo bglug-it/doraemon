@@ -114,7 +114,7 @@ class MyApp:
         'addpkg': [ 'gimp' ],
         'delpkg': []
       }
-    elif role == 'docente':
+    elif role == 'docenti':
       retval = {
         'role': role,
         'addpkg': [],
