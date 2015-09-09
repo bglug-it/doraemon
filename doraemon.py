@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 """Helps a client to join domain and maintain itself."""
-__author__ = 'Enrico Bacis'
-__email__ = 'enrico.bacis@gmail.com'
+__author__ = 'BgLUG'
+__email__ = 'info@bglug.it'
 
 from contextlib import contextmanager, closing
 from subprocess import Popen, PIPE
