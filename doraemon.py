@@ -5,6 +5,7 @@
 __author__ = 'BgLUG'
 __email__ = 'info@bglug.it'
 
+from collections import namedtuple
 from contextlib import contextmanager, closing
 from subprocess import Popen, PIPE
 from sqlite3 import connect
@@ -14,9 +15,13 @@ from ConfigParser import ConfigParser
 from Crypto.Hash import MD5
 from Crypto.Cipher import AES
 import base64
+import json
+import sys
 import re
 import os
-import sys
+
+# namedtuple used by Nethserver's Network Package Manager
+Package = namedtuple('Package', ['name', 'role', 'rule', 'description'])
 
 class MyApp:
   def __init__(self, configfile = '/etc/mac2hostname.ini'):
@@ -103,23 +108,19 @@ class MyApp:
       (role,) = cursor.execute("SELECT role FROM client WHERE hostname = '%s' AND mac = '%s'" % (hostname, macaddress)).fetchone()
     return role
 
-  # Mocks up variables to be returned.
-  # When will be ready Enrico's work on the interface, this should be simpler
-  # to implement.
+  # Parse a json pkg retrieved by Nethserver's Network Package Manager into a Package namedtuple
+  def parse_package(pkg):
+    return Package(pkg['name'], pkg['props']['Role'], pkg['props']['Rule'], pkg['props']['Description'])
+
+  # Variables returned to the client
   def __rolevars(self, role=None):
-    retval = {}
-    if role == 'client':
-      retval = {
-        'role': role,
-        'addpkg': [ 'gimp' ],
-        'delpkg': []
-      }
-    elif role == 'docenti':
-      retval = {
-        'role': role,
-        'addpkg': [],
-        'delpkg': []
-      }
+    retval = {'role': role, 'addpkg': [], 'delpkg': []}
+    try:
+      db = Popen(['db', 'packages', 'getjson'], stdout=PIPE).communicate()[0]
+      for pkg in map(parse_package, json.loads(db)):
+        if pkg.role == role:
+          result['addpkg' if pkg.rule == 'add' else 'delpkg'].append(str(pkg.name))
+    except: pass
     return retval
 
   # Instance methods AKA routes
