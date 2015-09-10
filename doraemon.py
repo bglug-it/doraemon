@@ -5,7 +5,6 @@
 __author__ = 'BgLUG'
 __email__ = 'info@bglug.it'
 
-from collections import namedtuple
 from contextlib import contextmanager, closing
 from subprocess import Popen, PIPE
 from sqlite3 import connect
@@ -19,9 +18,6 @@ import json
 import sys
 import re
 import os
-
-# namedtuple used by Nethserver's Network Package Manager
-Package = namedtuple('Package', ['name', 'role', 'rule', 'description'])
 
 class MyApp:
   def __init__(self, configfile = '/etc/mac2hostname.ini'):
@@ -108,18 +104,16 @@ class MyApp:
       (role,) = cursor.execute("SELECT role FROM client WHERE hostname = '%s' AND mac = '%s'" % (hostname, macaddress)).fetchone()
     return role
 
-  # Parse a json pkg retrieved by Nethserver's Network Package Manager into a Package namedtuple
-  def parse_package(pkg):
-    return Package(pkg['name'], pkg['props']['Role'], pkg['props']['Rule'], pkg['props']['Description'])
-
   # Variables returned to the client
   def __rolevars(self, role=None):
     retval = {'role': role, 'addpkg': [], 'delpkg': []}
     try:
-      db = Popen(['db', 'packages', 'getjson'], stdout=PIPE).communicate()[0]
-      for pkg in map(parse_package, json.loads(db)):
-        if pkg.role == role:
-          result['addpkg' if pkg.rule == 'add' else 'delpkg'].append(str(pkg.name))
+      db = Popen(['db', 'roles', 'getjson'], stdout=PIPE).communicate()[0]
+      for data in json.loads(db):
+          if data['name'] == role:
+              retval['addpkg'] = data['props']['Addpkg'].split()
+              retval['delpkg'] = data['props']['Delpkg'].split()
+              continue
     except: pass
     return retval
 
