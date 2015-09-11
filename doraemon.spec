@@ -9,7 +9,7 @@ BuildRoot: %{_tmppath}/%{name}-root
 Requires: python python-bottle python-crypto2.6 nethserver-base
 Requires(post): chkconfig nethserver-base
 Requires(preun): chkconfig initscripts nethserver-base
-Source0: doraemon-1.1.1.tar.gz
+Source0: doraemon-1.2.0.tar.gz
 BuildArch: noarch
 
 %description
