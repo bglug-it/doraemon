@@ -109,7 +109,7 @@ class MyApp:
   def __rolevars(self, role=None):
     retval = {'role': role, 'addpkg': [], 'delpkg': []}
     try:
-      db = Popen(['db', 'roles', 'getjson'], stdout=PIPE).communicate()[0]
+      db = Popen(['/sbin/e-smith/db', 'roles', 'getjson'], stdout=PIPE).communicate()[0]
       for data in json.loads(db):
           if data['name'] == role:
               retval['addpkg'] = data['props']['Addpkg'].split()
