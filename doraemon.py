@@ -63,6 +63,7 @@ class MyApp:
     self.__app.get('/vaultpass', callback=self.vaultpass)
     self.__app.get('/ansible_list', callback=self.ansible_list)
     self.__app.get('/ansible_host', callback=self.ansible_host)
+    self.__app.get('/epoptes-srv', callback=self.epoptes_srv)
 
   def __init_tables(self):
     with self.__getcursor() as cursor:
@@ -203,6 +204,16 @@ class MyApp:
     else:
       role = self.__getrole()
     return dumps(self.__rolevars(role))
+
+  def epoptes_srv(self):
+    hostname = None
+    try:
+      with self.__getcursor() as cursor:
+        (hostname,) = cursor.execute('SELECT hostname FROM client WHERE role = \'docenti\' ORDER BY id DESC LIMIT 1').fetchone()
+    except TypeError:
+      return 'none'
+
+    return hostname
 
   def start(self):
     # Opens up a PID file

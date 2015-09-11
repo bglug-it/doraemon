@@ -43,13 +43,13 @@ Actually, the server responds to the following routes:
   network.
 * `/vaultpass`: provides encrypted password for the decription of vaulted
   files within [Ansible configuration repository][client-pull-installation].
-
-## TODO List ##
-
-* Implement methods for dynamic inventory for Ansible
-* Verify RPM packaging to automatically start daemon as soon as it is
-  installed
-* Verify NethServer script for `runlevel-adjust`
+* `/ansible_list`: replies with the hostname list to be used with a dynamic
+  inventory script for Ansible, please see [this
+page][ansible-dynamic-inventory].
+* `/ansible_host`: receives a `host` parameter, but returns anyways additional
+  variables based on the MAC address of the client contacting it, to be used
+with dynamic inventory script for Ansible and `ansible-pull`.
+* `/epoptes-srv`: replies with the hostname of the local [Epoptes][epoptes] controller.
 
 [bglug]: http://bglug.it "BgLUG Homepage"
 [ubuntu]: http://www.ubuntu.com
@@ -62,3 +62,5 @@ Actually, the server responds to the following routes:
 [sqlite]: https://www.sqlite.org/
 [gplv2]: https://www.gnu.org/licenses/gpl-2.0.html
 [enrico bacis]: https://github.com/enricobacis
+[ansible-dynamic-inventory]: http://docs.ansible.com/ansible/developing_inventory.html
+[epoptes]: http://www.epoptes.org/
