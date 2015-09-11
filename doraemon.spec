@@ -1,6 +1,6 @@
 Summary: Helps client to join domain and maintain itself
 Name: doraemon
-Version: 1.1.1
+Version: 1.2.0
 Release: 1.ns6
 URL: https://github.com/bglug-it/doraemon/
 License: GPLv2+
@@ -76,6 +76,9 @@ rm -rf %{buildroot}
 %{_sysconfdir}/e-smith/db/configuration/defaults/%{name}/TCPPort
 
 %changelog
+* Mon Sep 11 2015 Emiliano Vavassori <syntaxerrormmm-AT-gmail.com> - 1.2.0-1.ns6
+- Packing new version with ansible dynamic inventory support, epoptes server role support.
+
 * Mon Sep 07 2015 Emiliano Vavassori <syntaxerrormmm-AT-gmail.com> - 1.1.1-1.ns6
 - Packing new version with correct roles.
 
