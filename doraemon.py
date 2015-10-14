@@ -112,8 +112,8 @@ class MyApp:
       db = Popen(['/sbin/e-smith/db', 'roles', 'getjson'], stdout=PIPE).communicate()[0]
       for data in json.loads(db):
           if data['name'] == role:
-              retval['addpkg'] = data['props']['Addpkg'].split()
-              retval['delpkg'] = data['props']['Delpkg'].split()
+              retval['addpkg'] = re.split(r'[\s,;]+', data['props']['Addpkg'])
+              retval['delpkg'] = re.split(r'[\s,;]+', data['props']['Delpkg'])
               continue
     except: pass
     return retval
