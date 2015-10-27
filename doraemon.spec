@@ -1,6 +1,6 @@
 Summary: Helps client to join domain and maintain itself
 Name: doraemon
-Version: 1.2.0
+Version: 1.2.1
 Release: 1.ns6
 URL: https://github.com/bglug-it/doraemon/
 License: GPLv2+
@@ -9,7 +9,7 @@ BuildRoot: %{_tmppath}/%{name}-root
 Requires: python python-bottle python-crypto2.6 nethserver-base
 Requires(post): chkconfig nethserver-base
 Requires(preun): chkconfig initscripts nethserver-base
-Source0: doraemon-1.2.0.tar.gz
+Source0: doraemon-1.2.1.tar.gz
 BuildArch: noarch
 
 %description
@@ -76,6 +76,9 @@ rm -rf %{buildroot}
 %{_sysconfdir}/e-smith/db/configuration/defaults/%{name}/TCPPort
 
 %changelog
+* Tue Oct 27 2015 Emiliano Vavassori <syntaxerrormmm-AT-gmail.com> - 1.2.1-1.ns6
+- Packing new minor correction on how packages are extracted from db
+
 * Mon Sep 11 2015 Emiliano Vavassori <syntaxerrormmm-AT-gmail.com> - 1.2.0-1.ns6
 - Packing new version with ansible dynamic inventory support, epoptes server role support.
 
