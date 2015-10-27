@@ -1,7 +1,7 @@
 Summary: Helps client to join domain and maintain itself
 Name: doraemon
 Version: 1.2.1
-Release: 1.ns6
+Release: 2.ns6
 URL: https://github.com/bglug-it/doraemon/
 License: GPLv2+
 Group: System Environment/Daemons
@@ -44,18 +44,22 @@ install -m 644 access %{buildroot}%{_sysconfdir}/e-smith/db/configuration/defaul
 install -m 644 TCPPort %{buildroot}%{_sysconfdir}/e-smith/db/configuration/defaults/%{name}/TCPPort
 
 %post
-/sbin/chkconfig --add %{name}
-/sbin/service %{name} start >/dev/null 2>&1
-/sbin/e-smith/db configuration set %{name} service status enabled TCPPort 3000 access private
-/sbin/e-smith/signal-event runlevel-adjust
-/sbin/e-smith/signal-event firewall-adjust
+if [ "$1" = 1 ]; then
+  /sbin/chkconfig --add %{name}
+  /sbin/service %{name} start >/dev/null 2>&1
+  /sbin/e-smith/db configuration set %{name} service status enabled TCPPort 3000 access private
+  /sbin/e-smith/signal-event runlevel-adjust
+  /sbin/e-smith/signal-event firewall-adjust
+fi
 
 %preun
-/sbin/e-smith/db configuration delete %{name}
-/sbin/service %{name} stop >/dev/null 2>&1
-chkconfig --del %{name}
-/sbin/e-smith/signal-event runlevel-adjust
-/sbin/e-smith/signal-event firewall-adjust
+if [ "$1" = 0 ]; then
+  /sbin/e-smith/db configuration delete %{name}
+  /sbin/service %{name} stop >/dev/null 2>&1
+  chkconfig --del %{name}
+  /sbin/e-smith/signal-event runlevel-adjust
+  /sbin/e-smith/signal-event firewall-adjust
+fi
 
 %clean
 rm -rf %{buildroot}
@@ -76,6 +80,9 @@ rm -rf %{buildroot}
 %{_sysconfdir}/e-smith/db/configuration/defaults/%{name}/TCPPort
 
 %changelog
+* Tue Oct 27 2015 Emiliano Vavassori <syntaxerrormmm-AT-gmail.com> - 1.2.1-2.ns6
+- Packing corrections to rpm to fix upgrading issue
+
 * Tue Oct 27 2015 Emiliano Vavassori <syntaxerrormmm-AT-gmail.com> - 1.2.1-1.ns6
 - Packing new minor correction on how packages are extracted from db
 
