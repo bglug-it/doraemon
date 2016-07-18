@@ -1,0 +1,14 @@
+[Unit]
+Description=Doraemon httpd instance
+Documentation=https://github.com/bglug-it/doraemon
+After=network.target remote-fs.target nss-lookup.target
+
+[Service]
+Type=simple
+EnvironmentFile=/etc/sysconfig/doraemon
+ExecStart=/usr/sbin/httpd -f /etc/httpd/doraemon/httpd.conf -c 'MaxConnectionsPerChild 12' -DFOREGROUND
+ExecReload=/usr/sbin/httpd -f /etc/httpd/doraemon/httpd.conf -k graceful
+LimitNOFILE=4096
+
+[Install]
+WantedBy=multi-user.target
