@@ -1,9 +1,0 @@
-[Unit]
-Description=Delayed graceful restart of doraemon service
-Documentation=https://github.com/bglug-it/doraemon
-Conflicts=doraemon-reload.service
-
-[Timer]
-OnActiveSec=5
-
-

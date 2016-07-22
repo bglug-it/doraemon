@@ -133,7 +133,7 @@ function ROUTE_hosts() {
     if (isset($get_params['role'])) {
         $items = $hosts_db->getAllByProp('Role', $get_params['role']);
     } else {
-        $items = $hosts_db->getAll();
+        $items = $hosts_db->getAll('remote');
     }
     $results=array();
     foreach ($items as $name=>$item) {
@@ -170,16 +170,18 @@ function ROUTE_ansible_list() {
 function ROUTE_vaultpass() {
     global $config_db;
     $theFile = $config_db->getProp(CONFIG_KEY,'VaultPassFile');
-    $content = trim(file_get_contents($theFile));
+    $oArr = array();
+    exec('/usr/bin/sudo /bin/cat ' . $theFile, $oArr, $exitCode);
+    $content = trim(implode("\n", $oArr));
     if (false === $content) {
         echo 'no file'; return;
     }   
     if (!$client = getClient()) {
         echo 'no client'; return;
     }
-    $key = md5($client['name']);
+    $key = md5($client['name'], true);
     $padlenght = 16 - (strlen($content) % 16);
-    $content_padded = str_repeat('x', $padlenght); 
+    $content_padded = $content . str_repeat('x', $padlenght); 
     $ciphertext = mcrypt_encrypt(MCRYPT_RIJNDAEL_128, $key, $content_padded, MCRYPT_MODE_ECB);
     echo base64_encode($ciphertext);
 }
@@ -230,7 +232,7 @@ function newHostname($mac, $base, $role) {
         return;
     }
     
-    $domainName = $config_db->getKeyValue('DomainName');
+    $domainName = (string)$config_db->getKeyValue('DomainName');
     $digits = $config_db->getProp(CONFIG_KEY,'NamingDigits');
     $formatstring = '%s-%0'.$digits.'d';
     $nr=0;
@@ -238,9 +240,10 @@ function newHostname($mac, $base, $role) {
     do {
         $nr++;
         $hostname = sprintf($formatstring, $base, $nr);
-        if ($domainName != '') {
-            $hostname .= '.' . $domainname;
-        }
+#       TODO: we'll use the hostname in future, maybe
+#        if (trim($domainName) != '') {
+#            $hostname .= '.' . $domainName;
+#        }
     } while ($hosts_db->getKey($hostname));
     
     $hosts_db->setKey($hostname, 'remote', array(

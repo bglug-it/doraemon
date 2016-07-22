@@ -1,15 +1,16 @@
 Summary: Helps client to join domain and maintain itself
 Name: doraemon
-Version: 1.2.1
-Release: 2.ns6
+Version: 1.3.0
+Release: 1.ns6
 URL: https://github.com/bglug-it/doraemon/
 License: GPLv2+
 Group: System Environment/Daemons
 BuildRoot: %{_tmppath}/%{name}-root
-Requires: python python-bottle python-crypto2.6 nethserver-base
-Requires(post): chkconfig nethserver-base
-Requires(preun): chkconfig initscripts nethserver-base
-Source0: doraemon-1.2.1.tar.gz
+BuildRequires: nethserver-devtools > 1.0.1
+Requires: httpd, php, sudo, php-xml, php-mcrypt
+Requires: nethserver-base, nethserver-php
+Requires: upstart
+Source0: doraemon-1.3.0.tar.gz
 BuildArch: noarch
 
 %description
@@ -21,33 +22,20 @@ Helps client on a domain network to get information for its maintenance.
 %build
 
 %install
-rm -rf %{buildroot}
-install -d %{buildroot}
-install -d -m 755 %{buildroot}%{_sysconfdir}
-install -m 644 doraemon.ini %{buildroot}%{_sysconfdir}/%{name}.ini
-# Installo il servizio
-install -d -m 755 %{buildroot}%{_initrddir}
-install -m 755 initrd %{buildroot}%{_initrddir}/%{name}
-# Installo lo script vero e proprio
-install -d -m 755 %{buildroot}%{_bindir}
-install -m 755 doraemon.py %{buildroot}%{_bindir}/%{name}.py
-# Cartella del database
-install -d %{buildroot}%{_sharedstatedir}/%{name}
-# File per il rotate
-install -d %{buildroot}%{_sysconfdir}/logrotate.d
-install -m 644 doraemon.logrotate %{buildroot}%{_sysconfdir}/logrotate.d/%{name}
-# File di Nethserver
-install -d %{buildroot}%{_sysconfdir}/e-smith/db/configuration/defaults/%{name}
-install -m 644 type %{buildroot}%{_sysconfdir}/e-smith/db/configuration/defaults/%{name}/type
-install -m 644 status %{buildroot}%{_sysconfdir}/e-smith/db/configuration/defaults/%{name}/status
-install -m 644 access %{buildroot}%{_sysconfdir}/e-smith/db/configuration/defaults/%{name}/access
-install -m 644 TCPPort %{buildroot}%{_sysconfdir}/e-smith/db/configuration/defaults/%{name}/TCPPort
+(cd root ; find . -depth -print | cpio -dump %{buildroot})
+rm -f %{name}-%{version}-%{release}-filelist
+%{genfilelist} %{buildroot} > %{name}-%{version}-%{release}-filelist
+mkdir -p %{buildroot}%{_localstatedir}/log/doraemon
+mkdir -p %{buildroot}%{_localstatedir}/cache/doraemon
+
+# Copy the webroot dir
+# mkdir -p %{buildroot}%{_datarootdir}/%{name}
+# cp -av doraemon/* %{buildroot}%{_datadir}/%{name}
 
 %post
 if [ "$1" = 1 ]; then
-  /sbin/chkconfig --add %{name}
-  /sbin/service %{name} start >/dev/null 2>&1
-  /sbin/e-smith/db configuration set %{name} service status enabled TCPPort 3000 access private
+  /sbin/start %{name} >/dev/null 2>&1 || :
+  /sbin/e-smith/db configuration set %{name} service status enabled TCPPort 3000 access private DefaultRole client DomainFile /etc/domain.yml ManagementKeyFile /home/amgmt/.ssh/id_rsa.pub NamingBase lab NamingDigits 2 VaultPassFile /home/amgmt/.ansible/vault.txt
   /sbin/e-smith/signal-event runlevel-adjust
   /sbin/e-smith/signal-event firewall-adjust
 fi
@@ -55,8 +43,7 @@ fi
 %preun
 if [ "$1" = 0 ]; then
   /sbin/e-smith/db configuration delete %{name}
-  /sbin/service %{name} stop >/dev/null 2>&1
-  chkconfig --del %{name}
+  /sbin/stop %{name} >/dev/null 2>&1 || :
   /sbin/e-smith/signal-event runlevel-adjust
   /sbin/e-smith/signal-event firewall-adjust
 fi
@@ -64,22 +51,26 @@ fi
 %clean
 rm -rf %{buildroot}
 
+%files -f %{name}-%{version}-%{release}-filelist
 %files
 %defattr(644,root,root,755)
-%doc README.md LICENSE
-%config(noreplace) %{_sysconfdir}/%{name}.ini
-%attr(755,-,-) %{_initrddir}/%{name}
-%attr(755,-,-) %{_bindir}/%{name}.py
+# %doc README.md LICENSE.txt
+# %attr(755,-,-) %{_initrddir}/%{name}
+# %{_sysconfdir}/logrotate.d/%{name}
+# %dir %{_sysconfdir}/httpd/doraemon
+%attr(0750,srvmgr,srvmgr) %dir %{_localstatedir}/cache/doraemon
+#  %attr(0644,root,root) %ghost %{_sysconfdir}/init/doraemon.conf
+#  %attr(0644,root,root) %ghost %{_sysconfdir}/httpd/doraemon/httpd.conf
+%attr(0700,root,root) %dir %{_localstatedir}/log/doraemon
+%attr(0644,root,root) %config %ghost %{_localstatedir}/log/doraemon/access_log
+%attr(0644,root,root) %config %ghost %{_localstatedir}/log/doraemon/error_log
 
-%dir %attr(755,-,-) %{_sharedstatedir}/%{name}
-%{_sysconfdir}/logrotate.d/%{name}
-%dir %attr(755,-,-) %{_sysconfdir}/e-smith/db/configuration/defaults/%{name}
-%{_sysconfdir}/e-smith/db/configuration/defaults/%{name}/status
-%{_sysconfdir}/e-smith/db/configuration/defaults/%{name}/type
-%{_sysconfdir}/e-smith/db/configuration/defaults/%{name}/access
-%{_sysconfdir}/e-smith/db/configuration/defaults/%{name}/TCPPort
 
 %changelog
+* Mon Jul 18 2016 Paolo Asperti <paolo-AT-asperti.com> - 1.3.0-1.ns6
+- PHP porting
+- Added a basic UI
+
 * Tue Oct 27 2015 Emiliano Vavassori <syntaxerrormmm-AT-gmail.com> - 1.2.1-2.ns6
 - Packing corrections to rpm to fix upgrading issue
 

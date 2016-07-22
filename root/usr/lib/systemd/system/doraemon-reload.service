@@ -1,9 +1,0 @@
-[Unit]
-Description=Graceful restart of doraemon service
-Documentation=https://github.com/bglug-it/doraemon
-Requisite=doraemon.service
-
-[Service]
-Type=oneshot
-ExecStart=/usr/sbin/httpd -f /etc/httpd/doraemon/httpd.conf -k graceful
-

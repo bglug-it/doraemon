@@ -1,0 +1,6 @@
+#
+# 50doraemon
+#
+srvmgr ALL=NOPASSWD: /bin/cat /home/amgmt/.ansible/vault.txt
+
+
