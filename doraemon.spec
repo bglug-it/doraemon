@@ -28,25 +28,101 @@ rm -f %{name}-%{version}-%{release}-filelist
 mkdir -p %{buildroot}%{_localstatedir}/log/doraemon
 mkdir -p %{buildroot}%{_localstatedir}/cache/doraemon
 
-# Copy the webroot dir
-# mkdir -p %{buildroot}%{_datarootdir}/%{name}
-# cp -av doraemon/* %{buildroot}%{_datadir}/%{name}
+
+%pre
+#if [ "$1" = 1 ]; then
+#  #installation
+#fi
+if [ "$1" = 2 ]; then
+  #upgrade
+  /sbin/stop %{name} >/dev/null 2>&1 || :
+  DATABASE=/var/lib/doraemon/doraemon.db
+  INI=/etc/doraemon.ini
+  if [ -f $INI ]; then
+    DATABASE=$(awk -F "=" '/Database/ {print $2}' $INI)
+    PORT=$(awk -F "=" '/Port/ {print $2}' $INI)
+    BASE=$(awk -F "=" '/Base/ {print $2}' $INI)
+    ROLE=$(awk -F "=" '/Role/ {print $2}' $INI)
+    DIGITS=$(awk -F "=" '/Digits/ {print $2}' $INI)
+    DOMAIN=$(awk -F "=" '/Domain/ {print $2}' $INI)
+    MGMTKEY=$(awk -F "=" '/MgmtKey/ {print $2}' $INI)
+    VAULTPASSFILE=$(awk -F "=" '/VaultPassFile/ {print $2}' $INI)
+    rm $INI
+    /sbin/e-smith/db configuration set %{name} service \
+      status enabled \
+      TCPPort $PORT \
+      access private \
+      DefaultRole $ROLE \
+      DomainFile $DOMAIN \
+      ManagementKeyFile $MGMTKEY \
+      NamingBase $BASE \
+      NamingDigits $DIGITS \
+      VaultPassFile $VAULTPASSFILE
+  else
+    /sbin/e-smith/db configuration set %{name} service \
+      status enabled \
+      TCPPort 3000 \
+      access private \
+      DefaultRole client \
+      DomainFile /etc/domain.yml \
+      ManagementKeyFile /home/amgmt/.ssh/id_rsa.pub \
+      NamingBase lab \
+      NamingDigits 2 \
+      VaultPassFile /home/amgmt/.ansible/vault.txt
+  fi
+  if [ -f $DATABASE ]; then
+    sqlite3 -separator " " $DATABASE \
+      "select * from client" | while read id hostname mac role; do
+      /sbin/e-smith/db hosts set $hostname remote \
+        MacAddress $mac Role $role
+    done
+    rm $DATABASE
+  fi
+fi
 
 %post
 if [ "$1" = 1 ]; then
+  #installation
   /sbin/e-smith/db configuration set %{name} service status enabled TCPPort 3000 access private DefaultRole client DomainFile /etc/domain.yml ManagementKeyFile /home/amgmt/.ssh/id_rsa.pub NamingBase lab NamingDigits 2 VaultPassFile /home/amgmt/.ansible/vault.txt
+  /sbin/e-smith/expand-template /etc/sudoers
+  /sbin/e-smith/expand-template /etc/httpd/doraemon/httpd.conf
+  /sbin/start %{name} >/dev/null 2>&1 || :
+  /sbin/e-smith/signal-event runlevel-adjust
+  /sbin/e-smith/signal-event firewall-adjust
+fi
+if [ "$1" = 2 ]; then
+  #upgrade
+  # TODO: this won't be needed in the next version
+  /sbin/e-smith/expand-template /etc/sudoers
+  /sbin/e-smith/expand-template /etc/httpd/doraemon/httpd.conf
   /sbin/start %{name} >/dev/null 2>&1 || :
   /sbin/e-smith/signal-event runlevel-adjust
   /sbin/e-smith/signal-event firewall-adjust
 fi
 
+
 %preun
+#if [ "$1" = 1 ]; then
+#  #upgrade
+#fi
 if [ "$1" = 0 ]; then
+  #uninstallation
   /sbin/stop %{name} >/dev/null 2>&1 || :
+fi
+
+
+%postun
+#if [ "$1" = 1 ]; then
+#  #upgrade
+#fi
+if [ "$1" = 0 ]; then
+  #uninstallation
   /sbin/e-smith/db configuration delete %{name}
+  /sbin/e-smith/expand-template /etc/sudoers
   /sbin/e-smith/signal-event runlevel-adjust
   /sbin/e-smith/signal-event firewall-adjust
 fi
+
 
 %clean
 rm -rf %{buildroot}
@@ -54,13 +130,8 @@ rm -rf %{buildroot}
 %files -f %{name}-%{version}-%{release}-filelist
 %files
 %defattr(644,root,root,755)
-# %doc README.md LICENSE.txt
-# %attr(755,-,-) %{_initrddir}/%{name}
-# %{_sysconfdir}/logrotate.d/%{name}
-# %dir %{_sysconfdir}/httpd/doraemon
+%doc README.md LICENSE.txt
 %attr(0750,srvmgr,srvmgr) %dir %{_localstatedir}/cache/doraemon
-#  %attr(0644,root,root) %ghost %{_sysconfdir}/init/doraemon.conf
-#  %attr(0644,root,root) %ghost %{_sysconfdir}/httpd/doraemon/httpd.conf
 %attr(0700,root,root) %dir %{_localstatedir}/log/doraemon
 %attr(0644,root,root) %config %ghost %{_localstatedir}/log/doraemon/access_log
 %attr(0644,root,root) %config %ghost %{_localstatedir}/log/doraemon/error_log
