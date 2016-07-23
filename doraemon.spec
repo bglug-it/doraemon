@@ -34,16 +34,16 @@ mkdir -p %{buildroot}%{_localstatedir}/cache/doraemon
 
 %post
 if [ "$1" = 1 ]; then
-  /sbin/start %{name} >/dev/null 2>&1 || :
   /sbin/e-smith/db configuration set %{name} service status enabled TCPPort 3000 access private DefaultRole client DomainFile /etc/domain.yml ManagementKeyFile /home/amgmt/.ssh/id_rsa.pub NamingBase lab NamingDigits 2 VaultPassFile /home/amgmt/.ansible/vault.txt
+  /sbin/start %{name} >/dev/null 2>&1 || :
   /sbin/e-smith/signal-event runlevel-adjust
   /sbin/e-smith/signal-event firewall-adjust
 fi
 
 %preun
 if [ "$1" = 0 ]; then
-  /sbin/e-smith/db configuration delete %{name}
   /sbin/stop %{name} >/dev/null 2>&1 || :
+  /sbin/e-smith/db configuration delete %{name}
   /sbin/e-smith/signal-event runlevel-adjust
   /sbin/e-smith/signal-event firewall-adjust
 fi
