@@ -79,9 +79,45 @@ function getClientMac($ip=false) {
     }
 }
 
+function newHostname($mac, $base, $role) {
+    global $config_db;
+    global $hosts_db;
+    if(!preg_match('/^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/', $mac)) {
+        echo "invalid mac address";
+        return;
+    }
+
+    if ($client=getClient($mac)) {
+        echo $client['name'];
+        return;
+    }
+
+    $domainName = (string)$config_db->getKeyValue('DomainName');
+    $digits = $config_db->getProp(CONFIG_KEY,'NamingDigits');
+    $formatstring = '%s-%0'.$digits.'d';
+    $nr=0;
+    $hostname = '';
+    do {
+        $nr++;
+        $hostname = sprintf($formatstring, $base, $nr);
+#       TODO: we'll use the hostname in future, maybe
+#        if (trim($domainName) != '') {
+#            $hostname .= '.' . $domainName;
+#        }
+    } while ($hosts_db->getKey($hostname));
+
+    $hosts_db->setKey($hostname, 'remote', array(
+		'MacAddress'    => $mac,
+		'Role'   		=> $role,
+		'Description' 	=> ''
+    ));
+
+    echo $hostname;
+}
+
 function pingHost($host, $timeout=1) {
     $pingresult = exec("/bin/ping -c 1 -t 2 -W $timeout $host", $output, $retvar);
-    return (0 == $retvar);    
+    return (0 == $retvar);
 }
 
 
@@ -92,7 +128,7 @@ function ROUTE_domain() {
     $content = file_get_contents($theFile);
     if (false !== $content) {
         echo $content;
-    }   
+    }
 }
 
 function ROUTE_mgmtkey() {
@@ -101,7 +137,7 @@ function ROUTE_mgmtkey() {
     $content = file_get_contents($theFile);
     if (false !== $content) {
         echo $content;
-    }   
+    }
 }
 
 function ROUTE_epoptes_srv() {
@@ -146,7 +182,6 @@ function ROUTE_hosts() {
     echo json_encode($results);
 }
 
-
 function ROUTE_ansible_list() {
     global $get_params;
     if (isset($get_params['role'])) {
@@ -166,7 +201,6 @@ function ROUTE_ansible_list() {
     ));
 }
 
-
 function ROUTE_vaultpass() {
     global $config_db;
     $theFile = $config_db->getProp(CONFIG_KEY,'VaultPassFile');
@@ -175,13 +209,13 @@ function ROUTE_vaultpass() {
     $content = trim(implode("\n", $oArr));
     if (false === $content) {
         echo 'no file'; return;
-    }   
+    }
     if (!$client = getClient()) {
         echo 'no client'; return;
     }
     $key = md5($client['name'], true);
     $padlenght = 16 - (strlen($content) % 16);
-    $content_padded = $content . str_repeat('x', $padlenght); 
+    $content_padded = $content . str_repeat('x', $padlenght);
     $ciphertext = mcrypt_encrypt(MCRYPT_RIJNDAEL_128, $key, $content_padded, MCRYPT_MODE_ECB);
     echo base64_encode($ciphertext);
 }
@@ -189,10 +223,13 @@ function ROUTE_vaultpass() {
 function ROUTE_whatsmyhostname() {
     global $config_db;
     $mac = getClientMac();
-    if (!$mac) return false;
+    if (!$mac) {
+      echo 'no-mac-address';
+      return false;
+    }
     $base = $config_db->getProp(CONFIG_KEY,'NamingBase');
     $role = $config_db->getProp(CONFIG_KEY,'DefaultRole');
-    echo newHostname($mac, $base, $role);
+    newHostname($mac, $base, $role);
 }
 
 function ROUTE_mac2hostname() {
@@ -209,49 +246,12 @@ function ROUTE_mac2hostname() {
     } else {
         $role = $config_db->getProp(CONFIG_KEY,'DefaultRole');
     }
-    
+
     if (isset($get_params['base'])) {
         $base = $get_params['base'];
     } else {
         $base = $config_db->getProp(CONFIG_KEY,'NamingBase');
     }
 
-    echo newHostname($mac, $base, $role);
+    newHostname($mac, $base, $role);
 }
-
-function newHostname($mac, $base, $role) {
-    global $config_db;
-    global $hosts_db;
-    if(!preg_match('/^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/', $mac)) {
-        echo "invalid mac address";
-        return;
-    }
-    
-    if ($client=getClient($mac)) {
-        echo $client['name'];
-        return;
-    }
-    
-    $domainName = (string)$config_db->getKeyValue('DomainName');
-    $digits = $config_db->getProp(CONFIG_KEY,'NamingDigits');
-    $formatstring = '%s-%0'.$digits.'d';
-    $nr=0;
-    $hostname = '';
-    do {
-        $nr++;
-        $hostname = sprintf($formatstring, $base, $nr);
-#       TODO: we'll use the hostname in future, maybe
-#        if (trim($domainName) != '') {
-#            $hostname .= '.' . $domainName;
-#        }
-    } while ($hosts_db->getKey($hostname));
-    
-    $hosts_db->setKey($hostname, 'remote', array(
-		'MacAddress'    => $mac,
-		'Role'   		=> $role,
-		'Description' 	=> ''
-    ));
-
-    echo $hostname;
-}
-
