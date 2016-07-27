@@ -12,7 +12,7 @@ class Modify extends \Nethgui\Controller\Table\Modify
     {
         $parameterSchema = array(
             // was: Validate::HOSTNAME_FQDN, but we need hostname
-            array('hostname', Validate::ANYTHING, \Nethgui\Controller\Table\Modify::KEY),
+            array('hostname', Validate::HOSTNAME_SIMPLE, \Nethgui\Controller\Table\Modify::KEY),
             array('MacAddress', Validate::MACADDRESS, \Nethgui\Controller\Table\Modify::FIELD),
             array('Role', Validate::ANYTHING, \Nethgui\Controller\Table\Modify::FIELD),
 //            array('Role', Validate::ROLES_COLLECTION ??? TODO!!!, \Nethgui\Controller\Table\Modify::FIELD),

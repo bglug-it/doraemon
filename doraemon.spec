@@ -9,6 +9,7 @@ BuildRoot: %{_tmppath}/%{name}-root
 BuildRequires: nethserver-devtools > 1.0.1
 Requires: httpd, php, sudo, php-xml, php-mcrypt
 Requires: nethserver-base, nethserver-php
+Requires: net-tools
 Requires: upstart
 Source0: doraemon-1.3.0.tar.gz
 BuildArch: noarch

@@ -18,11 +18,10 @@ class Hosts extends \Nethgui\Controller\TableController
         $this
             ->setTableAdapter($this->getPlatform()->getTableAdapter('hosts', 'remote'))
             ->setColumns($columns)
-       // TODO:
-       //     ->addRowAction(new \NethServer\Module\Doraemon\Hosts\Modify('wake'))
-       //     ->addRowAction(new \NethServer\Module\Doraemon\Hosts\Modify('reboot'))
-       //     ->addRowAction(new \NethServer\Module\Doraemon\Hosts\Modify('shutdown'))
             ->addRowAction(new \NethServer\Module\Doraemon\Hosts\Modify('update'))
+            ->addRowAction(new \NethServer\Module\Doraemon\Hosts\TogglePower('wake'))
+            ->addRowAction(new \NethServer\Module\Doraemon\Hosts\TogglePower('reboot'))
+            ->addRowAction(new \NethServer\Module\Doraemon\Hosts\TogglePower('shutdown'))
             ->addRowAction(new \NethServer\Module\Doraemon\Hosts\Modify('delete'))
             ->addTableAction(new \NethServer\Module\Doraemon\Hosts\Modify('create'))
             ->addTableAction(new \Nethgui\Controller\Table\Help('Help'))
