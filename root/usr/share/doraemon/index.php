@@ -125,19 +125,13 @@ function pingHost($host, $timeout=1) {
 function ROUTE_domain() {
     global $config_db;
     $theFile = $config_db->getProp(CONFIG_KEY,'DomainFile');
-    $content = file_get_contents($theFile);
-    if (false !== $content) {
-        echo $content;
-    }
+    passthru("/usr/bin/sudo /bin/cat $theFile");
 }
 
 function ROUTE_mgmtkey() {
     global $config_db;
     $theFile = $config_db->getProp(CONFIG_KEY,'ManagementKeyFile');
-    $content = file_get_contents($theFile);
-    if (false !== $content) {
-        echo $content;
-    }
+    passthru("/usr/bin/sudo /bin/cat $theFile");
 }
 
 function ROUTE_epoptes_srv() {
