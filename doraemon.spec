@@ -1,6 +1,6 @@
 Summary: Helps client to join domain and maintain itself
 Name: doraemon
-Version: 1.3.0
+Version: 2.0.0-alpha2
 Release: 1.ns6
 URL: https://github.com/bglug-it/doraemon/
 License: GPLv2+
@@ -11,7 +11,7 @@ Requires: httpd, php, sudo, php-xml, php-mcrypt
 Requires: nethserver-base, nethserver-php
 Requires: net-tools
 Requires: upstart
-Source0: doraemon-1.3.0.tar.gz
+Source0: doraemon-2.0.0.tar.gz
 BuildArch: noarch
 
 %description
@@ -82,6 +82,7 @@ if [ "$1" = 2 ]; then
 fi
 
 %post
+/etc/e-smith/events/actions/initialize-default-databases
 if [ "$1" = 1 ]; then
   #installation
   /sbin/e-smith/db configuration set %{name} service status enabled TCPPort 3000 access private DefaultRole client DomainFile /etc/domain.yml ManagementKeyFile /home/amgmt/.ssh/id_rsa.pub NamingBase lab NamingDigits 2 VaultPassFile /home/amgmt/.ansible/vault.txt
