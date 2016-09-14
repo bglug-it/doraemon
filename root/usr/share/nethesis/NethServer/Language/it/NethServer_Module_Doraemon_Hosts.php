@@ -5,3 +5,4 @@
 $L['Hosts_Title'] = 'Hosts';
 $L['Create_Host_Header'] = 'Crea un nuovo host';
 $L['Update_Host_Header'] = 'Modifica il nome host "${0}"';
+$L['Role_label'] = 'Ruolo';

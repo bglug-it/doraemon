@@ -5,7 +5,6 @@
 $L['Doraemon_Title'] = 'Doraemon';
 $L['Key_label'] = 'Hostname';
 $L['hostname_label'] = 'Hostname';
-$L['Role_label'] = 'Ruolo';
 $L['MacAddress_label'] = 'MAC Address';
 $L['shutdown_label'] = 'Spegni';
 $L['reboot_label'] = 'Riavvia';

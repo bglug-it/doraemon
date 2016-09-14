@@ -5,3 +5,4 @@
 $L['Rooms_Title'] = 'Stanze';
 $L['Create_Room_Header'] = 'Crea una nuova stanza';
 $L['Update_Room_Header'] = 'Modifica il nome stanza "${0}"';
+$L['Name_label'] = 'Nome';
