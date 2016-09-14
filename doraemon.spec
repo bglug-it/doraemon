@@ -1,28 +1,33 @@
 Summary: Helps client to join domain and maintain itself
 Name: doraemon
-Version: 2.0.0-alpha2
+Version: 2.0.0
 Release: 1.ns6
 URL: https://github.com/bglug-it/doraemon/
 License: GPLv2+
+Packager: Paolo Asperti <paolo@asperti.com>
 Group: System Environment/Daemons
 BuildRoot: %{_tmppath}/%{name}-root
 BuildRequires: nethserver-devtools > 1.0.1
+BuildRequires: hunspell-en
 Requires: httpd, php, sudo, php-xml, php-mcrypt
 Requires: nethserver-base, nethserver-php
 Requires: net-tools
 Requires: upstart
-Source0: doraemon-2.0.0.tar.gz
+Source0:  %{name}-%{version}.tar.gz
 BuildArch: noarch
 
 %description
 Helps client on a domain network to get information for its maintenance.
 
 %prep
-%setup -q
+%setup
 
 %build
+%{makedocs}
+perl createlinks.pl
 
 %install
+rm -Rf $RPM_BUILD_ROOT
 (cd root ; find . -depth -print | cpio -dump %{buildroot})
 rm -f %{name}-%{version}-%{release}-filelist
 %{genfilelist} %{buildroot} > %{name}-%{version}-%{release}-filelist
@@ -130,19 +135,15 @@ fi
 rm -rf %{buildroot}
 
 %files -f %{name}-%{version}-%{release}-filelist
-%files
-%defattr(644,root,root,755)
+%defattr(0644,root,root,755)
 %doc README.md LICENSE.txt
-%attr(0750,srvmgr,srvmgr) %dir %{_localstatedir}/cache/doraemon
-%attr(0700,root,root) %dir %{_localstatedir}/log/doraemon
-%attr(0644,root,root) %config %ghost %{_localstatedir}/log/doraemon/access_log
-%attr(0644,root,root) %config %ghost %{_localstatedir}/log/doraemon/error_log
 
 
 %changelog
-* Mon Jul 18 2016 Paolo Asperti <paolo-AT-asperti.com> - 1.3.0-1.ns6
+* Mon Jul 18 2016 Paolo Asperti <paolo@asperti.com> - 2.0.0-1
 - PHP porting
 - Added a basic UI
+- Added room support
 
 * Tue Oct 27 2015 Emiliano Vavassori <syntaxerrormmm-AT-gmail.com> - 1.2.1-2.ns6
 - Packing corrections to rpm to fix upgrading issue
