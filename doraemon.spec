@@ -137,6 +137,8 @@ rm -rf %{buildroot}
 %files -f %{name}-%{version}-%{release}-filelist
 %defattr(0644,root,root,755)
 %doc README.md LICENSE.txt
+%attr(0644,srvmgr,srvmgr) %ghost %{_localstatedir}/log/doraemon/access_log
+%attr(0644,srvmgr,srvmgr) %ghost %{_localstatedir}/log/doraemon/error_log
 
 
 %changelog
