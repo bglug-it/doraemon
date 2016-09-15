@@ -147,7 +147,8 @@ rm -rf %{buildroot}
 * Mon Jul 18 2016 Paolo Asperti <paolo@asperti.com> - 2.0.0-1
 - PHP porting
 - Added a basic UI
-- Added room support
+- TODO prima di release: controllare se /var/log/doraemon viene creata, controllare se il link ad httpd viene creato
+
 
 * Tue Oct 27 2015 Emiliano Vavassori <syntaxerrormmm-AT-gmail.com> - 1.2.1-2.ns6
 - Packing corrections to rpm to fix upgrading issue
