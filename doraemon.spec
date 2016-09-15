@@ -88,6 +88,8 @@ fi
 
 %post
 /etc/e-smith/events/actions/initialize-default-databases
+[ -e /usr/sbin/doraemon ] && [ ! -L /usr/sbin/doraemon ] && rm /usr/sbin/doraemon
+[ ! -L /usr/sbin/doraemon ] && ln -s httpd /usr/sbin/doraemon
 if [ "$1" = 1 ]; then
   #installation
   /sbin/e-smith/db configuration set %{name} service status enabled TCPPort 3000 access private DefaultRole client DomainFile /etc/domain.yml ManagementKeyFile /home/amgmt/.ssh/id_rsa.pub NamingBase lab NamingDigits 2 VaultPassFile /home/amgmt/.ansible/vault.txt
