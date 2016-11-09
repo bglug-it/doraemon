@@ -1,7 +1,7 @@
 Summary: Helps client to join domain and maintain itself
 Name: doraemon
-Version: 2.0.0
-Release: 8.ns6
+Version: 2.0.1
+Release: 1.ns6
 URL: https://github.com/bglug-it/doraemon/
 License: GPLv2+
 Packager: Paolo Asperti <paolo@asperti.com>
@@ -145,11 +145,9 @@ rm -rf %{buildroot}
 
 
 %changelog
-* Mon Jul 18 2016 Paolo Asperti <paolo@asperti.com> - 2.0.0-1
+* Wed Nov 9 2016 Paolo Asperti <paolo@asperti.com> - 2.0.1-1
 - PHP porting
 - Added a basic UI
-- TODO prima di release: controllare se /var/log/doraemon viene creata, controllare se il link ad httpd viene creato
-
 
 * Tue Oct 27 2015 Emiliano Vavassori <syntaxerrormmm-AT-gmail.com> - 1.2.1-2.ns6
 - Packing corrections to rpm to fix upgrading issue
