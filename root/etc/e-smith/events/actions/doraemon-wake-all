@@ -14,7 +14,7 @@ my @items = $db_hosts->get_all('local');
 foreach my $item (@items) {
   my $hostName = $item->key;
   my $mac = $item->prop('MacAddress');
-  system("/sbin/ether-wake -i lan0 $mac &") == 0
+  system("/sbin/ether-wake -b -i lan0 $mac &") == 0
       or die "Error waking up $hostName";
 }
 

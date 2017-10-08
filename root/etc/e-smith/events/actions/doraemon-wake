@@ -29,7 +29,7 @@ sub wake_host
     my $h = $db_hosts->get($hostName) or die "No host record for $hostName";
     my $client = $h[0];
     my $mac = $client->prop('MacAddress');
-    system("/sbin/ether-wake -i lan0 $mac") == 0
+    system("/sbin/ether-wake -b -i lan0 $mac") == 0
         or die "Error waking up $hostName";
 
 }
