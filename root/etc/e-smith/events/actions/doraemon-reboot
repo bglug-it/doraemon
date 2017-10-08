@@ -10,9 +10,9 @@ use English;
 
 my $db_hosts = esmith::DB::db->open('hosts') || die("Could not open e-smith db (" . esmith::DB::db->error . ")\n");
 
-my $event = $ARGV [0];
+my $event = $ARGV[0];
 
-defined $ARGV[1] || die "No host specied";
+defined $ARGV[1] || die "No host specified";
 my $host = $ARGV[1];
 
 reboot_host($host);
@@ -26,7 +26,7 @@ sub reboot_host
     # Reboot the host
     #------------------------------------------------------------
 
-    my $h = $db_hosts->get($hostName) or die "No host record for user $hostName";
+    my $h = $db_hosts->get($hostName) or die "No host record for $hostName";
 
     system("/usr/bin/sudo -u amgmt /usr/bin/ssh -o StrictHostKeyChecking=no amgmt\@$hostName /usr/bin/sudo /sbin/reboot") == 0
         or die "Error rebooting $hostName";
