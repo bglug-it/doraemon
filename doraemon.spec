@@ -1,6 +1,6 @@
 Summary: Helps client to join domain and maintain itself
 Name: doraemon
-Version: 2.0.1
+Version: 2.0.3
 Release: 1.ns6
 URL: https://github.com/bglug-it/doraemon/
 License: GPLv2+
@@ -145,6 +145,14 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Sun Jun 17 2018 Emiliano Vavassori <syntaxerrormmm-AT-gmail.com> - 2.0.3-1
+- FIX: whatsmyhostname correctly parse role variable
+- Minor aesthetic syntax fixes
+
+* Sun Oct 8 2017 Paolo Asperti <paolo@asperti.com> - 2.0.2-1
+- FIX: bug in WOL
+- FIX: small language typos
+
 * Wed Nov 9 2016 Paolo Asperti <paolo@asperti.com> - 2.0.1-1
 - PHP porting
 - Added a basic UI

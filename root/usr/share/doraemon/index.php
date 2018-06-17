@@ -53,7 +53,8 @@ function getClient($mac=false) {
     global $hosts_db;
     if (!$mac) {
         $mac = getClientMac();
-        if (!$mac) return false;
+        if (!$mac)
+	    return false;
     }
     $hosts = $hosts_db->getAllByProp('MacAddress',$mac);
     if (count($hosts)>0) {
@@ -68,7 +69,8 @@ function getClientMac($ip=false) {
         $ip = $_SERVER['REMOTE_ADDR'];
     }
     $result = pingHost($ip,1);
-    if (!$result) return false;
+    if (!$result)
+	return false;
     $macAddr=false;
     $arptable=`arp -n $ip`;
     $lines=explode("\n", $arptable);
@@ -82,11 +84,10 @@ function getClientMac($ip=false) {
 }
 
 function newHostname($mac, $base, $role) {
-    global $config_db;
-    global $hosts_db;
+    global $config_db, $hosts_db;
     if(!preg_match('/^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/', $mac)) {
         echo "invalid mac address";
-        return;
+        return false;
     }
 
     if ($client=getClient($mac)) {
@@ -122,8 +123,6 @@ function pingHost($host, $timeout=1) {
     return (0 == $retvar);
 }
 
-
-
 function ROUTE_domain() {
     global $config_db;
     $theFile = $config_db->getProp(CONFIG_KEY,'DomainFile');
@@ -139,6 +138,7 @@ function ROUTE_mgmtkey() {
 function ROUTE_epoptes_srv() {
     global $hosts_db;
     $hosts = $hosts_db->getAllByProp('Role','docenti');
+    ksort($hosts);
     if (count($hosts) == 0) {
         echo 'none';
     } else {
@@ -160,8 +160,7 @@ function ROUTE_ansible_host() {
 }
 
 function ROUTE_hosts() {
-    global $hosts_db;
-    global $get_params;
+    global $hosts_db, $get_params;
     if (isset($get_params['role'])) {
         $items = $hosts_db->getAllByProp('Role', $get_params['role']);
     } else {
@@ -204,10 +203,12 @@ function ROUTE_vaultpass() {
     exec('/usr/bin/sudo /bin/cat ' . $theFile, $oArr, $exitCode);
     $content = trim(implode("\n", $oArr));
     if (false === $content) {
-        echo 'no file'; return;
+        echo 'no file';
+	return false;
     }
     if (!$client = getClient()) {
-        echo 'no client'; return;
+        echo 'no client';
+	return false;
     }
     $key = md5($client['name'], true);
     $padlenght = 16 - (strlen($content) % 16);
@@ -217,26 +218,33 @@ function ROUTE_vaultpass() {
 }
 
 function ROUTE_whatsmyhostname() {
-    global $config_db;
+    global $config_db, $get_params;
+    if (isset($get_params['role'])) {
+        $role = $get_params['role'];
+    } else {
+        $role = $config_db->getProp(CONFIG_KEY,'DefaultRole');
+    }
+    if (isset($get_params['base'])) {
+        $base = $get_params['base'];
+    } else {
+        $base = $config_db->getProp(CONFIG_KEY,'NamingBase');
+    }
     $mac = getClientMac();
     if (!$mac) {
       echo 'no-mac-address';
       return false;
     }
-    $base = $config_db->getProp(CONFIG_KEY,'NamingBase');
-    $role = $config_db->getProp(CONFIG_KEY,'DefaultRole');
     newHostname($mac, $base, $role);
 }
 
 function ROUTE_mac2hostname() {
-    global $config_db;
-    global $get_params;
-    $mac = getClientMac();
-    if (!$mac) {
+    global $config_db, $get_params;
+    if (isset($get_params['mac'])) {
+	$mac = $get_params['mac'];
+    } else {
         echo 'Usage: GET /mac2hostname?mac=XX_XX_XX_XX_XX_XX[&base=YYY][&role=ZZZ]';
-        return;
+        return false;
     }
-
     if (isset($get_params['role'])) {
         $role = $get_params['role'];
     } else {
